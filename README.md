@@ -1,0 +1,3 @@
+REMS (Room Environment Monitoring System) is an advanced embedded system designed to continuously monitor and display real-time room temperature, air quality, and light levels on a 16x2 LCD screen. The system utilizes a combination of DHT11 (temperature and humidity sensor), MQ-135 (air quality sensor), and LDR (light-dependent resistor) to gather precise environmental data.
+
+This data is processed by an ATmega328P microcontroller, ensuring accurate measurement and efficient real-time analysis. The system provides users with clear and immediate feedback on indoor conditions, making it ideal for smart home automation, environmental monitoring, and academic research projects.
