@@ -1,0 +1,62 @@
+#include <Wire.h>                  // I2C protokolü için kütüphane
+#include <LiquidCrystal_I2C.h>     // I2C LCD ekran kütüphanesi
+#include <DHT.h>                   // DHT sensörü kütüphanesi
+#define DHTPIN 2           // DHT11 sensörünün bağlı olduğu pin
+#define DHTTYPE DHT11      // DHT11 sensör türü
+LiquidCrystal_I2C lcd(0x27, 16, 2); // LCD ekranın I2C adresi ve boyutları
+DHT dht(DHTPIN, DHTTYPE);           // DHT11 sensör nesnesi tanımlama
+// Pin tanımlamaları
+const int LDRPin = A0;          // LDR sensörü için analog pin
+const int MQ135Pin = A1;        // MQ-135 sensörü için analog pin
+const int LDRLEDPin = 3;        // LDR için LED pin
+const int MQ135LEDPin = 4;      // MQ-135 için LED pin
+// Eşik değerleri
+const int LDRThreshold = 800;   // LDR eşik değeri
+const int MQ135Threshold = 400; // MQ-135 eşik değeri
+// Zamanlayıcı değişkenleri
+unsigned long lastUpdate = 0;     // Zamanlayıcı için başlangıç değeri
+const long displayInterval = 5000; // Gösterim aralığı (5 saniye)
+bool showLDRandMQ135 = true;       // Gösterilecek veriyi izler
+void setup() {
+  pinMode(LDRLEDPin, OUTPUT);   // LDR LED pinini çıkış olarak ayarla
+  pinMode(MQ135LEDPin, OUTPUT); // MQ-135 LED pinini çıkış olarak ayarla
+Serial.begin(9600);           // Seri haberleşmeyi başlat
+  lcd.init();                   // LCD ekranı başlat
+  lcd.backlight();              // LCD arka ışığını aç
+  dht.begin();                  // DHT11 sensörünü başlat
+}
+void loop() {
+  // Her 5 saniyede bir gösterimi değiştir
+  if (millis() - lastUpdate >= displayInterval) { // 5 saniyede bir
+lastUpdate = millis();                        // Zamanlayıcıyı güncelle
+    showLDRandMQ135 = !showLDRandMQ135;           // Gösterimi değiştir
+ if (showLDRandMQ135) { 
+      // LDR ve MQ-135 sensörlerinin değerlerini oku
+      int LDRValue = analogRead(LDRPin);         // LDR değerini oku
+      int MQ135Value = analogRead(MQ135Pin);     // MQ-135 değerini oku
+        lcd.clear();                               // LCD'yi temizle
+      lcd.setCursor(0, 0);                       // LCD konumunu ayarla
+      lcd.print("LDR: ");                        // LDR değerini yazdır
+      lcd.print(LDRValue);
+      lcd.setCursor(0, 1);                       // Alt satıra geç
+      lcd.print("MQ-135: ");                     // MQ-135 değerini yazdır
+      lcd.print(MQ135Value);
+      // Eşik değerlerine göre LED'leri kontrol et
+      digitalWrite(LDRLEDPin, LDRValue > LDRThreshold ? HIGH : LOW);
+      digitalWrite(MQ135LEDPin, MQ135Value > MQ135Threshold ? HIGH : LOW);
+    } else {
+      // DHT11 sensöründen sıcaklık ve nem değerlerini oku
+      float temperature = dht.readTemperature(); // Sıcaklığı oku
+      float humidity = dht.readHumidity();       // Nem değerini oku
+      lcd.clear();                              // LCD'yi temizle
+      lcd.setCursor(0, 0);                      // LCD konumunu ayarla
+      if (!isnan(temperature) && !isnan(humidity)) { // Hatalı ölçüm kontrolü
+        lcd.print("Temp: ");
+        lcd.print(temperature);
+        lcd.print(" C");
+       lcd.setCursor(0, 1);                    // Alt satıra geç
+        lcd.print("Humidity: ");
+        lcd.print(humidity);
+        lcd.print(" %");
+     } else 
+lcd.print("DHT11 Hata");     // Ölçüm hatası} } }}
